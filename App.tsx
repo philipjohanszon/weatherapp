@@ -1,8 +1,9 @@
 import { StatusBar } from "expo-status-bar";
 import React, { useState } from "react";
-import { Button, DefaultTheme } from "react-native-paper";
+import { Button, DefaultTheme, Searchbar } from "react-native-paper";
 import { Provider as PaperProvider } from "react-native-paper";
 import { StyleSheet, View, Text } from "react-native";
+import WeatherView from "./components/weatherView";
 
 const theme = {
   ...DefaultTheme,
@@ -18,12 +19,7 @@ export default function App() {
 
   return (
     <PaperProvider theme={theme}>
-      <View style={styles.container}>
-        <>
-          <Text>{arr.map((val) => val)}</Text>
-          <StatusBar style="auto" />
-        </>
-      </View>
+      <WeatherView></WeatherView>
     </PaperProvider>
   );
 }
@@ -31,8 +27,10 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    width: "100%",
     backgroundColor: "#fff",
+    flexDirection: "column",
     alignItems: "center",
-    justifyContent: "center",
+    justifyContent: "flex-start",
   },
 });
