@@ -4,6 +4,7 @@ import { StyleSheet, Image } from "react-native";
 import axios from "axios";
 import TemperatureView from "./temperatureView";
 import DataViews from "./dataViews";
+import * as Location from "expo-location";
 
 export interface WeatherViewProps {
   foo?: string;
@@ -15,17 +16,48 @@ const url =
 const WeatherView: React.FC<WeatherViewProps> = ({ foo }) => {
   const [search, setSearch] = useState<string>("");
   const [weatherForecast, setWeatherForecast] = useState<WeatherForecast>();
+  const [hasQueried, setHasQueried] = useState<boolean>(false);
 
   useEffect(() => {
-    query();
+    if (hasQueried != true) {
+      queryLocation();
+      setHasQueried(true);
+    } else {
+      query();
+    }
   }, [search]);
 
   const query = async () => {
+    const searchData = search
+      .split("")
+      .map((char) =>
+        char === "ä" || char === "å" ? "a" : char === "ö" ? "o" : char
+      )
+      .join("");
+
     try {
-      const response = await axios.get(url + search);
+      const response = await axios.get(url + searchData);
       setWeatherForecast(response.data);
-    } catch (e) {
-      console.warn(e);
+    } catch {
+      setWeatherForecast(undefined);
+    }
+  };
+
+  const queryLocation = async () => {
+    let { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== "granted") {
+      return;
+    }
+
+    let location = await Location.getCurrentPositionAsync({});
+
+    try {
+      const response = await axios.get(
+        url + location?.coords.latitude + ", " + location?.coords.longitude
+      );
+      setWeatherForecast(response.data);
+    } catch {
+      setWeatherForecast(undefined);
     }
   };
 
@@ -60,12 +92,10 @@ const WeatherView: React.FC<WeatherViewProps> = ({ foo }) => {
         </>
       ) : (
         <>
-          <Text style={styles.cityText}>bruh</Text>
+          <Text style={styles.cityText}>No data found</Text>
           <Image
             style={styles.icon}
-            source={{
-              uri: "https://i.pinimg.com/474x/21/33/bc/2133bc99449900064b47cf7cc729f8c8.jpg",
-            }}
+            source={require("../assets/image.png")}
           ></Image>
         </>
       )}
@@ -74,7 +104,13 @@ const WeatherView: React.FC<WeatherViewProps> = ({ foo }) => {
         temperature={weatherForecast?.current.temp_c}
         feelsLike={weatherForecast?.current.feelslike_c}
       ></TemperatureView>
-      <DataViews></DataViews>
+      <DataViews
+        isLoaded={weatherForecast !== undefined}
+        uv={weatherForecast?.current.uv}
+        rain={weatherForecast?.current.cloud}
+        humidity={weatherForecast?.current.humidity}
+        wind={weatherForecast?.current.wind_kph}
+      ></DataViews>
     </>
   );
 };

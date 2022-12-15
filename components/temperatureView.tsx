@@ -11,13 +11,18 @@ export interface TemperatureViewProps {
 const TemperatureView: React.FC<TemperatureViewProps> = ({
   temperature,
   feelsLike,
+  isLoaded,
 }) => {
   return (
     <View style={styles.container}>
-      <Text style={{ ...styles.subText, marginTop: -40 }}>Temperatur</Text>
-      <Text style={styles.bigText}>{temperature}C</Text>
-      <Text style={styles.subText}>Feels like</Text>
-      <Text style={styles.bigText}>{feelsLike}C</Text>
+      {isLoaded && (
+        <>
+          <Text style={styles.subText}>Temperatur</Text>
+          <Text style={styles.bigText}>{temperature}C</Text>
+          <Text style={styles.subText}>Feels like</Text>
+          <Text style={styles.bigText}>{feelsLike}C</Text>
+        </>
+      )}
     </View>
   );
 };
@@ -28,6 +33,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginLeft: "auto",
     marginRight: "auto",
+    marginTop: 10,
   },
   bigText: {
     fontSize: 30,
